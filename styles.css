@@ -1,0 +1,136 @@
+@property --progress {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 0%;
+}
+
+@property --opacity {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
+:root {
+    --white: 255 255 255;
+    --black: 0 0 0;
+    --color-bgc: var(--white);
+    --color-txt: var(--black);
+    --mix-blend: screen;
+
+    @media(prefers-color-scheme: dark) {
+        --color-bgc: var(--black);
+        --color-txt: var(--white);
+        --mix-blend: multiply;
+    }
+}
+
+html {
+    background-color: rgb(var(--color-bgc));
+    height: 100%;
+    box-sizing: border-box;
+}
+
+html *,
+html *::before,
+html *::after {
+    box-sizing: inherit;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    font-family: 'Poppins', sans-serif;
+}
+
+button {
+    --unit: min(18px, 3vw);
+    --edge-spacing: calc(0.2 * var(--unit));
+    --button-radius: calc(var(--edge-spacing) * 10);
+    --opacity: 0;
+    --opacity-percent: calc(var(--opacity) * 100%);
+    --opacity-percent-inverted: calc(100% - var(--opacity-percent));
+    --progress-multiplier: 3;
+    --progress-multiplied: calc(var(--progress) * var(--progress-multiplier));
+    --min-percent: calc(0% - var(--progress-multiplied));
+    --max-percent: calc(calc(100% * var(--progress-multiplier)) - var(--progress-multiplied));
+    backface-visibility: hidden;
+    background-color: rgb(var(--color-txt));
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: stretch;
+    appearance: none;
+    padding: var(--edge-spacing);
+    border-width: 0px;
+    /* using 2px here as a buffer to cover some lingering pixels at smaller viewport widths */
+    box-shadow: inset 0 0 0 calc(var(--edge-spacing) + 2px) rgb(var(--color-bgc) / calc(0.75 * var(--opacity-percent-inverted)));
+    font-size: calc(4 * var(--unit));
+    font-family: inherit;
+    letter-spacing: calc(-0.0625 * var(--unit));
+    border-radius: var(--button-radius);
+    background-image: repeating-linear-gradient(to right,
+            hsl(0 100% 50% / var(--opacity-percent)) var(--min-percent),
+            hsl(60 100% 50% / var(--opacity-percent)),
+            hsl(120 100% 50% / var(--opacity-percent)),
+            hsl(180 100% 50% / var(--opacity-percent)),
+            hsl(240 100% 50% / var(--opacity-percent)),
+            hsl(300 100% 50% / var(--opacity-percent)),
+            hsl(360 100% 50% / var(--opacity-percent)),
+            hsl(0 100% 50% / var(--opacity-percent)) var(--max-percent));
+    background-repeat: repeat-x;
+    transform: scale(1);
+    cursor: pointer;
+    animation: animate-progress 1s linear infinite;
+    transition: scale 0.25s ease-out,
+        --opacity 0.25s ease-out;
+
+    &:hover {
+        scale: 1.1;
+        --opacity: 1;
+
+        &:active {
+            scale: 1;
+            transition: scale 0.15s ease-out,
+                --opacity 0.25s ease-out;
+        }
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        --offset: calc(4 * var(--unit));
+        width: calc(100% - var(--offset));
+        height: calc(100% - var(--offset));
+        translate: -50% -50%;
+        background: inherit;
+        --blur-amount: calc(5 * var(--unit) * var(--opacity));
+        filter: blur(var(--blur-amount));
+        border-radius: inherit;
+    }
+}
+
+.button-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(var(--color-bgc));
+    padding: calc(2 * var(--unit));
+    border-radius: calc(0.9 * var(--button-radius));
+    color: rgb(var(--color-txt));
+    mix-blend-mode: var(--mix-blend);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@keyframes animate-progress {
+    from {
+        --progress: 0%;
+    }
+
+    to {
+        --progress: 100%
+    }
+}
